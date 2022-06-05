@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.vladimir.shoppinglist.domain.ShopItem
 import com.vladimir.shoppinglist.domain.ShopListRepository
+import kotlin.random.Random
 
 // делаем object который является single tone тоесть где бы мы не обратисись к
 // обьекту это будет один и тот же обьект это нужно чтобы не получилось так что мы
@@ -13,15 +14,18 @@ object ShopListRepositoryImpl : ShopListRepository {
 
     private val shopListLD = MutableLiveData<List<ShopItem>>()
 
-    private val shopList = mutableListOf<ShopItem>()
+    // сравниваем елементы, создаем sortedSetOf он создаст ThreeSet
+    // делаем при помощи анонимного класса и передаем в компаратор
+    // и реализуем медот компер но мы сделаем через лямбду и делаем компер
+    private val shopList = sortedSetOf<ShopItem>({ p0, p1 -> p0.id.compareTo(p1.id) })
 
     private var autoIncrementId = 0
 
 
 
     init {
-        for (i in 0 until 10) {
-            val item = ShopItem("Name $i",i,true)
+        for (i in 0 until 100) {
+            val item = ShopItem("Name $i",i, Random.nextBoolean())
             addShopItem(item)
         }
     }
