@@ -8,16 +8,15 @@ import com.vladimir.shoppinglist.R
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var viewModel : MainViewModel
+    private lateinit var viewModel: MainViewModel
     private lateinit var adapter: ShopItemAdapter
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setUpRecyclerView()
-        viewModel = ViewModelProvider(this)[MainViewModel :: class.java]
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         viewModel.shopList.observe(this) {
             adapter.shopList = it
@@ -29,8 +28,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpRecyclerView() {
         val rvShopList = findViewById<RecyclerView>(R.id.rv_shop_list)
-        adapter = ShopItemAdapter()
-        rvShopList.adapter = adapter
+        with(rvShopList) {
+            adapter = ShopItemAdapter()
+            rvShopList.adapter = adapter
+            recycledViewPool.setMaxRecycledViews(
+                R.layout.item_shop_enabled,
+                ShopItemAdapter.MAX_PULL_SIZE
+            )
+            recycledViewPool.setMaxRecycledViews(
+                R.layout.item_shop_disabled,
+                ShopItemAdapter.MAX_PULL_SIZE
+            )
+        }
     }
 
 }

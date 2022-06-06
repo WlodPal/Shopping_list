@@ -1,10 +1,10 @@
 package com.vladimir.shoppinglist.presentation
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.vladimir.shoppinglist.R
 import com.vladimir.shoppinglist.domain.ShopItem
@@ -17,6 +17,10 @@ class ShopItemAdapter : RecyclerView.Adapter<ShopItemAdapter.ShopItemViewHolder>
             notifyDataSetChanged()
         }
 
+    var count = 0
+
+
+
 
     class ShopItemViewHolder(val view : View): RecyclerView.ViewHolder(view){
         val tvName = view.findViewById<TextView>(R.id.tv_name)
@@ -25,41 +29,52 @@ class ShopItemAdapter : RecyclerView.Adapter<ShopItemAdapter.ShopItemViewHolder>
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShopItemViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.item_shop_enabled,
-            parent,
-            false
-        )
+        Log.d("onCreateViewHolder", "$count")
+        count++
+        val layout = when (viewType){
+            LIST_ITEM_IS_ACTIVE -> R.layout.item_shop_enabled
+            LIST_ITEM_NOT_ACTIVE -> R.layout.item_shop_disabled
+            else -> throw RuntimeException("Unknown viewType $viewType")
+        }
+        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
         return ShopItemViewHolder(view)
+
     }
 
     override fun onBindViewHolder(holder: ShopItemViewHolder, position: Int) {
         val shopItem = shopList[position]
-        val status = if (shopItem.isActive){
-            "Active"
-        }else {
-            "Not Active"
-        }
+
         holder.view.setOnLongClickListener{
 
             true
         }
+        holder.tvName.text = shopItem.name
+        holder.tvCount.text = shopItem.count.toString()
 
-        if (shopItem.isActive){
-            holder.tvName.text = "${shopItem.name} $status"
-            holder.tvCount.text = shopItem.count.toString()
-            holder.tvName.setTextColor(ContextCompat.getColor(holder.view.context, R.color.black))
-        }
     }
 
     override fun onViewRecycled(holder: ShopItemViewHolder) {
         super.onViewRecycled(holder)
         holder.tvName.text = ""
         holder.tvCount.text = ""
-        holder.tvName.setTextColor(ContextCompat.getColor(holder.view.context, R.color.white))
     }
 
     override fun getItemCount(): Int {
         return shopList.size
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        val item = shopList[position]
+        return if (item.isActive){
+            LIST_ITEM_IS_ACTIVE
+        } else {
+            LIST_ITEM_NOT_ACTIVE
+        }
+    }
+
+    companion object {
+        const val LIST_ITEM_IS_ACTIVE = 100
+        const val LIST_ITEM_NOT_ACTIVE = 101
+        const val MAX_PULL_SIZE = 15
     }
 }
