@@ -1,8 +1,10 @@
 package com.vladimir.shoppinglist.presentation
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +25,8 @@ class ShopItemFragment : Fragment() {
     private lateinit var etCount: EditText
     private lateinit var buttonSave: Button
 
+    private lateinit var onEditingFinishedListener: OnEditingFinishedListener
+
 
     private var screenMode: String = MODE_UNKNOWN
     private var shopItemID: Int = ShopItem.UNDEFINED_ID
@@ -30,10 +34,20 @@ class ShopItemFragment : Fragment() {
     // fragment может тоже работать с ViewModel
     private lateinit var viewModel: ShopItemViewModel
 
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnEditingFinishedListener) {
+            onEditingFinishedListener = context
+        } else {
+            throw RuntimeException("Activity must implement OnEditingFinishedListener")
+        }
+    }
+
     /*
-    pars params нужно вызывать сдесь но не обезательно
-    это для того чтобы если каке-то параметры не переданы мы не создавали View
-     */
+        pars params нужно вызывать сдесь но не обезательно
+        это для того чтобы если каке-то параметры не переданы мы не создавали View
+         */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         purseParams()
@@ -78,7 +92,15 @@ class ShopItemFragment : Fragment() {
         }
 
         viewModel.closeScreen.observe(viewLifecycleOwner) {
-            activity?.onBackPressed()
+
+            onEditingFinishedListener.onEditingFinished()
+
+//            activity?.onBackPressed()
+
+
+            // такое решение плохое когда явно приводим тип
+            //(activity as MainActivity).onEditingFinished()
+
             /*
             requireActivity().onBackPressed() -> не нулабельное
             но если вернется null то програма упадет
@@ -186,6 +208,10 @@ class ShopItemFragment : Fragment() {
         etName = view.findViewById(R.id.et_name)
         etCount = view.findViewById(R.id.et_count)
         buttonSave = view.findViewById(R.id.b_save)
+    }
+
+    interface OnEditingFinishedListener {
+        fun onEditingFinished()
     }
 
     companion object {
