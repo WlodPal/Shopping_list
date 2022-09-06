@@ -11,24 +11,26 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.vladimir.shoppinglist.R
+import com.vladimir.shoppinglist.databinding.ActivityMainBinding
 import com.vladimir.shoppinglist.domain.ShopItem
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
 
-    private lateinit var viewModel: MainViewModel
+    private val viewModel by lazy {
+        ViewModelProvider(this)[MainViewModel::class.java]
+    }
     private lateinit var shopItemAdapter: ShopItemAdapter
 
-    private var shopItemContainer: FragmentContainerView? = null
+    private lateinit var binding: ActivityMainBinding
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        shopItemContainer = findViewById(R.id.shop_item_container)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setUpRecyclerView()
-        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
-        val buttonAddItem = findViewById<FloatingActionButton>(R.id.fab_add_shoe_item)
-        buttonAddItem.setOnClickListener {
+        binding.fabAddShoeItem.setOnClickListener {
             if (isOnePaneMode()) {
                 val intent = ShopItemActivity.newIntentAddItem(this)
                 startActivity(intent)
@@ -52,7 +54,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
     если нет то в альбомной
      */
     private fun isOnePaneMode(): Boolean {
-        return shopItemContainer == null
+        return binding.shopItemContainer == null
     }
 
     /*
@@ -77,8 +79,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
 
 
     private fun setUpRecyclerView() {
-        val rvShopList = findViewById<RecyclerView>(R.id.rv_shop_list)
-        with(rvShopList) {
+        with(binding.rvShopList) {
             shopItemAdapter = ShopItemAdapter()
             adapter = shopItemAdapter
             recycledViewPool.setMaxRecycledViews(
@@ -92,7 +93,7 @@ class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedList
         }
         setUpLongClickListener()
         setUpShortClickListener()
-        setUpSwipeDelete(rvShopList)
+        setUpSwipeDelete(binding.rvShopList)
     }
 
 

@@ -14,25 +14,24 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.vladimir.shoppinglist.R
+import com.vladimir.shoppinglist.databinding.FragmentShopItemBinding
 import com.vladimir.shoppinglist.domain.ShopItem
 
 class ShopItemFragment : Fragment() {
 
+    private var _binding: FragmentShopItemBinding? = null
+    private val binding: FragmentShopItemBinding
+        get() = _binding ?: throw RuntimeException("FragmentShopItemBinding == null")
 
-    private lateinit var tilName: TextInputLayout
-    private lateinit var tilCount: TextInputLayout
-    private lateinit var etName: EditText
-    private lateinit var etCount: EditText
-    private lateinit var buttonSave: Button
+    // fragment может тоже работать с ViewModel
+    private val viewModel by lazy {
+        ViewModelProvider(this)[ShopItemViewModel::class.java]
+    }
 
     private lateinit var onEditingFinishedListener: OnEditingFinishedListener
 
-
     private var screenMode: String = MODE_UNKNOWN
     private var shopItemID: Int = ShopItem.UNDEFINED_ID
-
-    // fragment может тоже работать с ViewModel
-    private lateinit var viewModel: ShopItemViewModel
 
 
     override fun onAttach(context: Context) {
@@ -43,7 +42,6 @@ class ShopItemFragment : Fragment() {
             throw RuntimeException("Activity must implement OnEditingFinishedListener")
         }
     }
-
     /*
         pars params нужно вызывать сдесь но не обезательно
         это для того чтобы если каке-то параметры не переданы мы не создавали View
@@ -57,15 +55,16 @@ class ShopItemFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_shop_item, container, false)
+    ): View {
+        _binding = FragmentShopItemBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     // момент в который мы точно заем что View создана
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
-        initViews(view)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
         addTextChangeListeners()
         chooseWrightMode()
         observeFromViewModel()
@@ -73,23 +72,6 @@ class ShopItemFragment : Fragment() {
 
 
     private fun observeFromViewModel() {
-        viewModel.errorInputCount.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.error_input_count)
-            } else {
-                null
-            }
-            tilCount.error = message
-        }
-
-        viewModel.errorInputName.observe(viewLifecycleOwner) {
-            val message = if (it) {
-                getString(R.string.error_input_name)
-            } else {
-                null
-            }
-            tilName.error = message
-        }
 
         viewModel.closeScreen.observe(viewLifecycleOwner) {
 
@@ -117,7 +99,7 @@ class ShopItemFragment : Fragment() {
     }
 
     private fun addTextChangeListeners() {
-        etName.addTextChangedListener(object : TextWatcher {
+        binding.etName.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -127,7 +109,7 @@ class ShopItemFragment : Fragment() {
             override fun afterTextChanged(p0: Editable?) {}
         })
 
-        etCount.addTextChangedListener(object : TextWatcher {
+        binding.etCount.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -148,18 +130,20 @@ class ShopItemFragment : Fragment() {
         может быть что view уже умерла а фрамгмент еще жив поетому this не используем.
         viewLifecycleOwner - это жизненый цикл созданой view а не фрагмента
         */
-        viewModel.shopItem.observe(viewLifecycleOwner) {
-            etName.setText(it.name)
-            etCount.setText(it.count.toString())
-        }
-        buttonSave.setOnClickListener {
-            viewModel.editShopItem(etName.text?.toString(), etCount.text?.toString())
+        binding.bSave.setOnClickListener {
+            viewModel.editShopItem(
+                binding.etName.text?.toString(),
+                binding.etCount.text?.toString()
+            )
         }
     }
 
     private fun lunchAddMode() {
-        buttonSave.setOnClickListener {
-            viewModel.addShopItem(etName.text?.toString(), etCount.text?.toString())
+        binding.bSave.setOnClickListener {
+            viewModel.addShopItem(
+                binding.etName.text?.toString(),
+                binding.etCount.text?.toString()
+            )
         }
     }
 
@@ -202,12 +186,9 @@ class ShopItemFragment : Fragment() {
            */
     }
 
-    private fun initViews(view: View) {
-        tilName = view.findViewById(R.id.til_name)
-        tilCount = view.findViewById(R.id.til_count)
-        etName = view.findViewById(R.id.et_name)
-        etCount = view.findViewById(R.id.et_count)
-        buttonSave = view.findViewById(R.id.b_save)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     interface OnEditingFinishedListener {
