@@ -1,20 +1,23 @@
 package com.vladimir.shoppinglist.presentation
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.*
 import com.vladimir.shoppinglist.data.ShopListRepositoryImpl
 import com.vladimir.shoppinglist.domain.DeleteShopItemUseCase
 import com.vladimir.shoppinglist.domain.EditShopItemUseCase
 import com.vladimir.shoppinglist.domain.GetShopListUseCase
 import com.vladimir.shoppinglist.domain.ShopItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 
 // если нужен контекст то наследуемся от AndroidViewModel
 // если нет тогда просто ViewModel
-class MainViewModel : ViewModel() {
+class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = ShopListRepositoryImpl
+    private val repository = ShopListRepositoryImpl(application)
 
     // в качестве конструктора везде нужно передать репозиторий
     // мы передадим эту реализация не правильным образом
@@ -32,7 +35,6 @@ class MainViewModel : ViewModel() {
     // переворот экрана. Если мы перевернем экран то Activity отпишется от обьекта LiveData
     // екран будет уничтожен вызван метод onDestroy() после Activity пересоздастся и
     // снова подпишется на обьект LiveData получив  у него последнее значение
-
 
     //создаем обьект LiveData
     // val shopList = LiveData<List<ShopItem>>() - не возможно создать экземпляр
@@ -58,13 +60,18 @@ class MainViewModel : ViewModel() {
 //    }
 
     fun deleteShopItem(shopItem: ShopItem) {
-        deleteShopItemUseCase.deleteShopItem(shopItem)
+        viewModelScope.launch {
+            deleteShopItemUseCase.deleteShopItem(shopItem)
+        }
 //        getShopList()
     }
 
     fun isActiveChange(shopItem: ShopItem) {
-        val newItem = shopItem.copy(isActive = !shopItem.isActive)
-        editShopItemUseCase.editShopItem(newItem)
+        viewModelScope.launch {
+            val newItem = shopItem.copy(isActive = !shopItem.isActive)
+            editShopItemUseCase.editShopItem(newItem)
+        }
 //        getShopList()
     }
+
 }
