@@ -1,4 +1,4 @@
-package com.vladimir.shoppinglist.data
+package com.vladimir.shoppinglist.data.database
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
@@ -19,5 +19,5 @@ interface ShopListDao {
     suspend fun deleteShopItem(shopItemId: Int)
 
     @Query("SELECT * FROM shop_items WHERE id=:shopItemId LIMIT 1")
-    suspend fun getShopItem(shopItemId: Int):ShopItemDbModel
+    suspend fun getShopItem(shopItemId: Int): ShopItemDbModel
 }

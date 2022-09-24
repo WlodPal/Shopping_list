@@ -1,4 +1,4 @@
-package com.vladimir.shoppinglist.presentation
+package com.vladimir.shoppinglist.presentation.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -2,30 +2,35 @@ package com.vladimir.shoppinglist.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.vladimir.shoppinglist.R
 import com.vladimir.shoppinglist.databinding.ActivityMainBinding
-import com.vladimir.shoppinglist.domain.ShopItem
+import com.vladimir.shoppinglist.presentation.adapters.ShopItemAdapter
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
     private val viewModel by lazy {
-        ViewModelProvider(this)[MainViewModel::class.java]
+        ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
     }
     private lateinit var shopItemAdapter: ShopItemAdapter
 
     private lateinit var binding: ActivityMainBinding
 
+    private val component by lazy {
+        (application as ShopListApp).component
+    }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)

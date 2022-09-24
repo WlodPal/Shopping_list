@@ -1,25 +1,22 @@
 package com.vladimir.shoppinglist.presentation
 
-import android.app.Application
-import androidx.lifecycle.*
-import com.vladimir.shoppinglist.data.ShopListRepositoryImpl
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.vladimir.shoppinglist.domain.AddShopItemUseCase
 import com.vladimir.shoppinglist.domain.EditShopItemUseCase
 import com.vladimir.shoppinglist.domain.GetShopItemUseCase
 import com.vladimir.shoppinglist.domain.ShopItem
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.lang.Exception
+import javax.inject.Inject
 
-class ShopItemViewModel(application: Application) : AndroidViewModel(application) {
+class ShopItemViewModel @Inject constructor(
+    private val getShopItemUseCase: GetShopItemUseCase,
+    private val addShopItemUseCase: AddShopItemUseCase,
+    private val editShopItemUseCase: EditShopItemUseCase
 
-    private val repository = ShopListRepositoryImpl(application)
-
-    private val getShopItemUseCase = GetShopItemUseCase(repository)
-    private val addShopItemUseCase = AddShopItemUseCase(repository)
-    private val editShopItemUseCase = EditShopItemUseCase(repository)
+) : ViewModel() {
 
 
     private val _errorInputName = MutableLiveData<Boolean>()
